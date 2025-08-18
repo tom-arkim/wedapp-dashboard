@@ -6,8 +6,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
+import { equipmentData } from "./equipment-list"
 
-// Sample data for different metrics
 const generateSampleData = (metric: string, timeFrame: string) => {
   const dataPoints = timeFrame === "hour" ? 60 : timeFrame === "day" ? 24 : timeFrame === "month" ? 30 : 12
   const baseValue = metric === "temperature" ? 25 : metric === "humidity" ? 45 : 75
@@ -22,13 +22,19 @@ const generateSampleData = (metric: string, timeFrame: string) => {
             ? `Day ${i + 1}`
             : ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][i]
 
-    return {
-      time,
-      asset1: baseValue + Math.random() * 10 - 5,
-      asset2: baseValue + Math.random() * 8 - 4,
-      asset3: baseValue + Math.random() * 12 - 6,
-      asset4: baseValue + Math.random() * 6 - 3,
-    }
+    const dataPoint: any = { time }
+    equipmentData.forEach((equipment, index) => {
+      const equipmentKey = `equipment_${equipment.id}`
+      // Vary the data based on equipment type for more realistic readings
+      let variation = Math.random() * 10 - 5
+      if (equipment.name.toLowerCase().includes("freezer")) {
+        variation = Math.random() * 3 - 1.5 // Freezers have more stable readings
+      } else if (equipment.name.toLowerCase().includes("blender")) {
+        variation = Math.random() * 15 - 7.5 // Blenders have more variable readings
+      }
+      dataPoint[equipmentKey] = baseValue + variation
+    })
+    return dataPoint
   })
 }
 
@@ -36,26 +42,17 @@ const metricConfig = {
   temperature: {
     label: "Temperature",
     unit: "°C",
-    color1: "#3b82f6", // blue
-    color2: "#ef4444", // red
-    color3: "#eab308", // yellow
-    color4: "#06b6d4", // cyan
+    colors: ["#3b82f6", "#ef4444", "#eab308", "#06b6d4", "#8b5cf6"], // Added more colors for 5 equipment
   },
   humidity: {
     label: "Humidity",
     unit: "%",
-    color1: "#3b82f6",
-    color2: "#ef4444",
-    color3: "#eab308",
-    color4: "#06b6d4",
+    colors: ["#3b82f6", "#ef4444", "#eab308", "#06b6d4", "#8b5cf6"],
   },
   power: {
     label: "Power Usage",
     unit: "kW",
-    color1: "#3b82f6",
-    color2: "#ef4444",
-    color3: "#eab308",
-    color4: "#06b6d4",
+    colors: ["#3b82f6", "#ef4444", "#eab308", "#06b6d4", "#8b5cf6"],
   },
 }
 
@@ -97,15 +94,16 @@ export function Monitoring() {
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Asset Selection</label>
                   <Select value={selectedAsset} onValueChange={setSelectedAsset}>
-                    <SelectTrigger className="w-[180px]">
+                    <SelectTrigger className="w-[200px]">
                       <SelectValue placeholder="Select asset" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">All Assets</SelectItem>
-                      <SelectItem value="asset1">Asset 1</SelectItem>
-                      <SelectItem value="asset2">Asset 2</SelectItem>
-                      <SelectItem value="asset3">Asset 3</SelectItem>
-                      <SelectItem value="asset4">Asset 4</SelectItem>
+                      <SelectItem value="all">All Equipment</SelectItem>
+                      {equipmentData.map((equipment) => (
+                        <SelectItem key={equipment.id} value={`equipment_${equipment.id}`}>
+                          {equipment.name}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -188,46 +186,24 @@ export function Monitoring() {
                           return null
                         }}
                       />
-                      {(selectedAsset === "all" || selectedAsset === "asset1") && (
-                        <Line
-                          type="monotone"
-                          dataKey="asset1"
-                          stroke={config.color1}
-                          strokeWidth={2}
-                          dot={false}
-                          name="Asset 1"
-                        />
-                      )}
-                      {(selectedAsset === "all" || selectedAsset === "asset2") && (
-                        <Line
-                          type="monotone"
-                          dataKey="asset2"
-                          stroke={config.color2}
-                          strokeWidth={2}
-                          dot={false}
-                          name="Asset 2"
-                        />
-                      )}
-                      {(selectedAsset === "all" || selectedAsset === "asset3") && (
-                        <Line
-                          type="monotone"
-                          dataKey="asset3"
-                          stroke={config.color3}
-                          strokeWidth={2}
-                          dot={false}
-                          name="Asset 3"
-                        />
-                      )}
-                      {(selectedAsset === "all" || selectedAsset === "asset4") && (
-                        <Line
-                          type="monotone"
-                          dataKey="asset4"
-                          stroke={config.color4}
-                          strokeWidth={2}
-                          dot={false}
-                          name="Asset 4"
-                        />
-                      )}
+                      {equipmentData.map((equipment, index) => {
+                        const equipmentKey = `equipment_${equipment.id}`
+                        const shouldShow = selectedAsset === "all" || selectedAsset === equipmentKey
+
+                        if (!shouldShow) return null
+
+                        return (
+                          <Line
+                            key={equipment.id}
+                            type="monotone"
+                            dataKey={equipmentKey}
+                            stroke={config.colors[index % config.colors.length]}
+                            strokeWidth={2}
+                            dot={false}
+                            name={equipment.name}
+                          />
+                        )
+                      })}
                     </LineChart>
                   </ResponsiveContainer>
                 </div>
@@ -235,30 +211,22 @@ export function Monitoring() {
                 {/* Legend placed below the chart */}
                 <div className="mt-6 pt-4 border-t">
                   <div className="flex flex-wrap gap-6 justify-center">
-                    {(selectedAsset === "all" || selectedAsset === "asset1") && (
-                      <div className="flex items-center gap-2">
-                        <div className="h-3 w-8 rounded" style={{ backgroundColor: config.color1 }} />
-                        <span className="text-sm text-muted-foreground">Asset 1</span>
-                      </div>
-                    )}
-                    {(selectedAsset === "all" || selectedAsset === "asset2") && (
-                      <div className="flex items-center gap-2">
-                        <div className="h-3 w-8 rounded" style={{ backgroundColor: config.color2 }} />
-                        <span className="text-sm text-muted-foreground">Asset 2</span>
-                      </div>
-                    )}
-                    {(selectedAsset === "all" || selectedAsset === "asset3") && (
-                      <div className="flex items-center gap-2">
-                        <div className="h-3 w-8 rounded" style={{ backgroundColor: config.color3 }} />
-                        <span className="text-sm text-muted-foreground">Asset 3</span>
-                      </div>
-                    )}
-                    {(selectedAsset === "all" || selectedAsset === "asset4") && (
-                      <div className="flex items-center gap-2">
-                        <div className="h-3 w-8 rounded" style={{ backgroundColor: config.color4 }} />
-                        <span className="text-sm text-muted-foreground">Asset 4</span>
-                      </div>
-                    )}
+                    {equipmentData.map((equipment, index) => {
+                      const equipmentKey = `equipment_${equipment.id}`
+                      const shouldShow = selectedAsset === "all" || selectedAsset === equipmentKey
+
+                      if (!shouldShow) return null
+
+                      return (
+                        <div key={equipment.id} className="flex items-center gap-2">
+                          <div
+                            className="h-3 w-8 rounded"
+                            style={{ backgroundColor: config.colors[index % config.colors.length] }}
+                          />
+                          <span className="text-sm text-muted-foreground">{equipment.name}</span>
+                        </div>
+                      )
+                    })}
                   </div>
                 </div>
               </CardContent>
