@@ -79,3 +79,93 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Force proper scaling and prevent overflow */
+@layer utilities {
+  .dashboard-responsive {
+    @apply w-full min-w-0;
+  }
+
+  .dashboard-grid {
+    @apply grid gap-4 w-full;
+    grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+  }
+
+  .dashboard-grid-2 {
+    @apply grid gap-4 w-full;
+    grid-template-columns: repeat(auto-fit, minmax(min(400px, 100%), 1fr));
+  }
+
+  .dashboard-grid-3 {
+    @apply grid gap-4 w-full;
+    grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr));
+  }
+
+  .dashboard-card {
+    @apply w-full min-w-0;
+  }
+
+  .dashboard-table {
+    @apply w-full overflow-x-auto;
+  }
+
+  .dashboard-chart {
+    @apply w-full h-[300px] min-w-0;
+  }
+}
+
+/* Override any fixed widths that might cause issues */
+@layer components {
+  /* Ensure Recharts canvases stretch and don't introduce overflow */
+  .recharts-wrapper {
+    @apply w-full min-w-0;
+  }
+
+  .recharts-surface {
+    @apply w-full;
+  }
+
+  /* Ensure tables are responsive */
+  table {
+    @apply w-full table-auto;
+  }
+
+  /* Ensure cards don't overflow */
+  .card {
+    @apply min-w-0 w-full;
+  }
+
+  /* Make sure sidebar transitions smoothly */
+  [data-sidebar] {
+    transition: all 0.2s ease-in-out;
+  }
+}
+
+/* Responsive breakpoints for better scaling */
+@media (max-width: 1024px) {
+  .dashboard-grid {
+    grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+  }
+
+  .dashboard-grid-2 {
+    grid-template-columns: repeat(auto-fit, minmax(min(350px, 100%), 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-grid,
+  .dashboard-grid-2,
+  .dashboard-grid-3 {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-chart {
+    @apply h-[250px];
+  }
+}
+
+@media (max-width: 640px) {
+  .dashboard-chart {
+    @apply h-[200px];
+  }
+}

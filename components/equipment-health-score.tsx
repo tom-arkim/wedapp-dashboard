@@ -511,159 +511,113 @@ export function EquipmentHealthScore({
     return (celsius * 9) / 5 + 32
   }
 
-  // Update the CustomTooltip component
+  // Enhanced Custom Tooltip with essential information only
   const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-      const dataPoint = payload[0].payload
-      const date = new Date(label)
+    if (!active || !payload || payload.length === 0) return null
 
-      // Find all equipment data for this date
-      const equipmentData = []
-      for (const filter of equipmentFilters) {
-        const actualKey = `actual_${filter.id}`
-        const predictedKey = `predicted_${filter.id}`
+    const date = new Date(label)
 
-        if (dataPoint[actualKey] !== undefined || dataPoint[predictedKey] !== undefined) {
-          const value = dataPoint[actualKey] !== null ? dataPoint[actualKey] : dataPoint[predictedKey]
-          const isActual = dataPoint[actualKey] !== null && dataPoint[actualKey] !== undefined
+    // Helper function to determine risk level based on health score
+    const getRiskLevel = (healthScore: number) => {
+      if (healthScore <= 25) return { level: "Critical", color: "text-red-600", bgColor: "bg-red-50" }
+      if (healthScore <= 60) return { level: "Warning", color: "text-yellow-600", bgColor: "bg-yellow-50" }
+      return { level: "Healthy", color: "text-green-600", bgColor: "bg-green-50" }
+    }
 
-          if (value !== undefined) {
-            equipmentData.push({
-              id: filter.id,
-              name: filter.name,
-              value,
-              isActual,
-              color: filter.color,
-            })
-          }
-        }
-      }
+    // Filter valid equipment data points
+    const validPayload = payload.filter(
+      (item: any) =>
+        item.dataKey &&
+        (item.dataKey.startsWith("actual_") || item.dataKey.startsWith("predicted_")) &&
+        typeof item.value === "number",
+    )
 
-      // Find maintenance events for this date
-      const maintenanceEvents = dataPoint.maintenance || []
+    if (validPayload.length === 0) return null
 
-      // Find sensor anomalies for this date
-      const sensorAnomalies = dataPoint.sensorAnomaly || []
+    return (
+      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl p-4 min-w-[280px] max-w-[320px] z-50 pointer-events-none">
+        {/* Date Header */}
+        <div className="text-sm font-semibold text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-600 pb-2 mb-3">
+          {format(date, "MMMM d, yyyy")}
+        </div>
 
-      return (
-        <div className="bg-background border rounded-md shadow-md p-3 max-w-xs">
-          <p className="font-semibold">{format(date, "MMM d, yyyy")}</p>
+        {/* Equipment Information */}
+        <div className="space-y-3">
+          {validPayload.map((item: any, index: number) => {
+            const [type, equipmentId] = item.dataKey.split("_")
+            const equipment = equipmentData.find((eq) => eq.id === equipmentId)
+            const isActual = type === "actual"
+            const healthScore = item.value
+            const risk = getRiskLevel(healthScore)
 
-          {equipmentData.length > 0 && (
-            <div className="mt-2">
-              <p className="text-sm font-medium">Equipment Health Scores:</p>
-              <div className="space-y-1 mt-1">
-                {equipmentData.map((eq) => {
-                  // Determine risk level
-                  let riskLevel = "Low"
-                  let riskColor = "text-green-500"
+            if (!equipment) return null
 
-                  if (eq.value <= riskZones.high.max) {
-                    riskLevel = "High"
-                    riskColor = "text-red-500"
-                  } else if (eq.value <= riskZones.medium.max) {
-                    riskLevel = "Medium"
-                    riskColor = "text-yellow-500"
-                  }
+            return (
+              <div
+                key={`${item.dataKey}-${index}`}
+                className="space-y-2 border-b border-gray-100 dark:border-gray-600 pb-3 last:border-b-0 last:pb-0"
+              >
+                {/* Asset Name with color indicator */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <div
+                      className="w-3 h-3 rounded-full border border-white shadow-sm"
+                      style={{ backgroundColor: item.color }}
+                    />
+                    <span className="font-semibold text-gray-900 dark:text-gray-100">{equipment.name}</span>
+                    {!isActual && (
+                      <span className="text-xs bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 px-2 py-1 rounded-full">
+                        Predicted
+                      </span>
+                    )}
+                  </div>
+                </div>
 
-                  return (
-                    <div key={eq.id} className="flex items-center justify-between">
-                      <div className="flex items-center">
-                        <div className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: eq.color }}></div>
-                        <span className="text-sm">{eq.name}:</span>
-                      </div>
-                      <div className="flex items-center">
-                        <span className="text-sm font-medium">{eq.value.toFixed(1)}%</span>
-                        <span className={`text-xs ml-2 ${riskColor}`}>({riskLevel})</span>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* Add sensor data readings section */}
-          {(() => {
-            // Find sensor data for this date from the first equipment that has data
-            const sensorData = visibleData.find(d => d.date === label)?.sensorData
-
-            if (sensorData) {
-              return (
-                <div className="mt-2 pt-2 border-t">
-                  <p className="text-sm font-medium">Sensor Readings:</p>
-                  <div className="grid grid-cols-2 gap-2 mt-1 text-xs">
-                    <div className="flex items-center">
-                      <Thermometer className="h-3 w-3 mr-1 text-blue-500" />
-                      <span>{convertTemperature(sensorData.temperature).toFixed(1)}°F</span>
-                    </div>
-                    <div className="flex items-center">
-                      <Zap className="h-3 w-3 mr-1 text-yellow-500" />
-                      <span>{sensorData.energyCurrent.toFixed(1)}A</span>
-                    </div>
-                    <div className="flex items-center">
-                      <Zap className="h-3 w-3 mr-1 text-green-500" />
-                      <span>{sensorData.energyLoad.toFixed(1)}kW</span>
-                    </div>
-                    <div className="flex items-center">
-                      <Waves className="h-3 w-3 mr-1 text-red-500" />
-                      <span>{sensorData.vibration.toFixed(2)}mm/s</span>
-                    </div>
-                    <div className="col-span-2 flex items-center">
-                      <div className="w-3 h-3 rounded-full mr-1 bg-purple-500"></div>
-                      <span>Efficiency: {sensorData.compressorEfficiency.toFixed(1)}%</span>
+                {/* Essential Information Grid */}
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <div>
+                    <span className="text-gray-600 dark:text-gray-400 text-xs uppercase tracking-wide">Asset:</span>
+                    <div className="font-medium text-gray-900 dark:text-gray-100">{equipment.name}</div>
+                  </div>
+                  <div>
+                    <span className="text-gray-600 dark:text-gray-400 text-xs uppercase tracking-wide">Location:</span>
+                    <div className="font-medium text-gray-900 dark:text-gray-100">{equipment.location}</div>
+                  </div>
+                  <div>
+                    <span className="text-gray-600 dark:text-gray-400 text-xs uppercase tracking-wide">
+                      Health Score:
+                    </span>
+                    <div className="font-bold text-lg text-gray-900 dark:text-gray-100">{healthScore.toFixed(1)}%</div>
+                  </div>
+                  <div>
+                    <span className="text-gray-600 dark:text-gray-400 text-xs uppercase tracking-wide">Risk:</span>
+                    <div className={`font-semibold ${risk.color}`}>{risk.level}</div>
+                  </div>
+                  <div className="col-span-2">
+                    <span className="text-gray-600 dark:text-gray-400 text-xs uppercase tracking-wide">Status:</span>
+                    <div
+                      className={`font-medium capitalize ${
+                        equipment.status === "operational"
+                          ? "text-green-600"
+                          : equipment.status === "warning"
+                            ? "text-yellow-600"
+                            : equipment.status === "critical"
+                              ? "text-red-600"
+                              : equipment.status === "maintenance"
+                                ? "text-blue-600"
+                                : "text-gray-600"
+                      }`}
+                    >
+                      {equipment.status}
                     </div>
                   </div>
                 </div>
-              )
-            }
-            return null
-          })()}
-
-          {maintenanceEvents.length > 0 && (
-            <div className="mt-2 pt-2 border-t">
-              <p className="text-sm font-medium">Maintenance Events:</p>
-              <div className="space-y-1 mt-1">
-                {maintenanceEvents.map((event) => (
-                  <div key={event.id} className="text-sm">
-                    <div className="flex items-center">
-                      <Tool className="h-3 w-3 mr-1" />
-                      <span>{equipmentData.find((eq) => eq.id === event.equipmentId)?.name || "Equipment"}</span>
-                    </div>
-                    <p className="text-xs text-muted-foreground">{event.description}</p>
-                    <p className="text-xs text-muted-foreground">Impact: +{event.impact}% lifespan</p>
-                  </div>
-                ))}
               </div>
-            </div>
-          )}
-
-          {sensorAnomalies.length > 0 && (
-            <div className="mt-2 pt-2 border-t">
-              <p className="text-sm font-medium">Sensor Anomalies:</p>
-              <div className="space-y-1 mt-1">
-                {sensorAnomalies.map((anomaly) => (
-                  <div key={anomaly.id} className="text-sm">
-                    <div className="flex items-center">
-                      <AlertTriangle
-                        className={`h-3 w-3 mr-1 ${anomaly.severity === "critical" ? "text-red-500" : "text-yellow-500"}`}
-                      />
-                      <span>{equipmentData.find((eq) => eq.id === anomaly.equipmentId)?.name || "Equipment"}</span>
-                    </div>
-                    <p className="text-xs text-muted-foreground">{anomaly.description}</p>
-                    <p className="text-xs text-muted-foreground">Impact: {anomaly.impact}% lifespan</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          <div className="mt-2 pt-2 border-t text-xs text-muted-foreground">Click for more details</div>
+            )
+          })}
         </div>
-      )
-    }
-
-    return null
+      </div>
+    )
   }
 
   // Handle event click
@@ -902,7 +856,17 @@ export function EquipmentHealthScore({
                   }
                 />
                 <YAxis domain={[0, 100]} label={{ value: "Health Score (%)", angle: -90, position: "insideLeft" }} />
-                <Tooltip content={<CustomTooltip />} />
+                <Tooltip
+                  content={<CustomTooltip />}
+                  cursor={{ stroke: "#666", strokeWidth: 1, strokeDasharray: "3 3" }}
+                  wrapperStyle={{
+                    zIndex: 9999,
+                    pointerEvents: "auto",
+                  }}
+                  allowEscapeViewBox={{ x: true, y: true }}
+                  isAnimationActive={false}
+                  position={{ x: undefined, y: undefined }}
+                />
                 <Legend
                   content={(props) => {
                     const { payload } = props
@@ -987,10 +951,21 @@ export function EquipmentHealthScore({
                       dataKey={`actual_${filter.id}`}
                       stroke={filter.color}
                       strokeWidth={2}
-                      dot={{ r: 3 }}
-                      activeDot={{ r: 8 }}
-                      name={`actual_${filter.id}`}
-                      connectNulls
+                      dot={{
+                        r: 4,
+                        strokeWidth: 2,
+                        fill: "white",
+                        stroke: filter.color,
+                      }}
+                      activeDot={{
+                        r: 6,
+                        strokeWidth: 3,
+                        fill: "white",
+                        stroke: filter.color,
+                        style: { cursor: "pointer" },
+                      }}
+                      name={filter.name}
+                      connectNulls={false}
                     />
                   ))}
 
@@ -1006,10 +981,23 @@ export function EquipmentHealthScore({
                         stroke={filter.color}
                         strokeWidth={2}
                         strokeDasharray="5 5"
-                        dot={false}
-                        name={`predicted_${filter.id}`}
-                        connectNulls
-                        legend={false}
+                        dot={{
+                          r: 3,
+                          strokeWidth: 2,
+                          fill: "white",
+                          stroke: filter.color,
+                          opacity: 0.7,
+                        }}
+                        activeDot={{
+                          r: 5,
+                          strokeWidth: 2,
+                          fill: "white",
+                          stroke: filter.color,
+                          opacity: 0.9,
+                          style: { cursor: "pointer" },
+                        }}
+                        name={`${filter.name} (Predicted)`}
+                        connectNulls={false}
                       />
                     ))}
 
@@ -1281,3 +1269,5 @@ export function EquipmentHealthScore({
         </div>
       </CardContent>
     </Card>
+  )
+}

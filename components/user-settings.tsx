@@ -19,12 +19,21 @@ export default function UserSettings() {
     }
   }, [activeTab])
 
-  // Load active tab from localStorage
+  // Load active tab from localStorage or URL params
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const savedTab = localStorage.getItem("settingsActiveTab")
-      if (savedTab) {
-        setActiveTab(savedTab)
+      // Check URL params first
+      const urlParams = new URLSearchParams(window.location.search)
+      const tabParam = urlParams.get("tab")
+
+      if (tabParam && ["account", "display", "notifications"].includes(tabParam)) {
+        setActiveTab(tabParam)
+      } else {
+        // Fall back to localStorage
+        const savedTab = localStorage.getItem("settingsActiveTab")
+        if (savedTab) {
+          setActiveTab(savedTab)
+        }
       }
     }
   }, [])

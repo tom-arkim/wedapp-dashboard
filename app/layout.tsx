@@ -4,13 +4,14 @@ import { Inter } from "next/font/google"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { SettingsProvider } from "@/contexts/settings-context"
+import { Providers } from "@/components/providers"
 
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Industrial Dashboard",
-  description: "Real-time monitoring for industrial equipment",
-    generator: 'v0.dev'
+  title: "Dashboard",
+  description: "Real-time equipment monitoring",
+    generator: 'v0.app'
 }
 
 export default function RootLayout({
@@ -25,7 +26,9 @@ export default function RootLayout({
       </head>
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <SettingsProvider>{children}</SettingsProvider>
+          <SettingsProvider>
+            <Providers>{children}</Providers>
+          </SettingsProvider>
         </ThemeProvider>
       </body>
     </html>

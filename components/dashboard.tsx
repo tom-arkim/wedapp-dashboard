@@ -3,7 +3,19 @@
 import { useState, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { BarChart3, Settings, User, Wrench, Database, TrendingUp, AlertTriangle, FileText, Plus } from "lucide-react"
+import {
+  BarChart3,
+  Settings,
+  User,
+  Wrench,
+  Database,
+  TrendingUp,
+  AlertTriangle,
+  FileText,
+  Plus,
+  Activity,
+  Users,
+} from "lucide-react"
 import { EquipmentList } from "./equipment-list"
 import { NotificationsDropdown } from "./notifications-dropdown"
 import { ThemeToggle } from "./theme-toggle"
@@ -78,6 +90,10 @@ export default function Dashboard() {
   const handleNavigation = (itemId: string) => {
     if (itemId === "maintenance") {
       router.push("/maintenance")
+    } else if (itemId === "monitoring") {
+      router.push("/monitoring")
+    } else if (itemId === "users") {
+      router.push("/users")
     } else {
       setActiveTab(itemId)
     }
@@ -88,6 +104,11 @@ export default function Dashboard() {
       id: "overview",
       label: "Overview",
       icon: BarChart3,
+    },
+    {
+      id: "monitoring",
+      label: "Monitoring",
+      icon: Activity,
     },
     {
       id: "equipment",
@@ -103,6 +124,11 @@ export default function Dashboard() {
       id: "data-logs",
       label: "Data Logs",
       icon: Database,
+    },
+    {
+      id: "users",
+      label: "Users",
+      icon: Users,
     },
     {
       id: "generate-report",
@@ -193,7 +219,71 @@ export default function Dashboard() {
                 </div>
               </div>
             )}
+            {activeTab === "monitoring" && (
+              <div className="space-y-4">
+                {/* Equipment Health Score - Full Width */}
+                <div className="w-full">
+                  <EquipmentHealthScore
+                    sharedMaintenanceEvents={sharedMaintenanceEvents}
+                    onMaintenanceEventUpdate={handleMaintenanceEventUpdate}
+                    liveSensorData={liveSensorData}
+                  />
+                </div>
+
+                {/* Sensor Insights - Full Width */}
+                <div className="w-full">
+                  <SensorInsights selectedEquipmentId={selectedEquipmentId} />
+                </div>
+
+                {/* Energy Usage Summary - Full Width */}
+                <div className="w-full">
+                  <EnergyUsageSummary />
+                </div>
+
+                {/* Equipment Status and Cycle Tracking - Responsive Grid */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  <div className="w-full">
+                    <EquipmentStatus />
+                  </div>
+                  <div className="w-full">
+                    <EquipmentCycleTracking />
+                  </div>
+                </div>
+              </div>
+            )}
             {activeTab === "equipment" && <EquipmentList onEquipmentSelect={handleEquipmentSelect} />}
+            {activeTab === "maintenance" && (
+              <div className="space-y-4">
+                {/* Equipment Health Score - Full Width */}
+                <div className="w-full">
+                  <EquipmentHealthScore
+                    sharedMaintenanceEvents={sharedMaintenanceEvents}
+                    onMaintenanceEventUpdate={handleMaintenanceEventUpdate}
+                    liveSensorData={liveSensorData}
+                  />
+                </div>
+
+                {/* Sensor Insights - Full Width */}
+                <div className="w-full">
+                  <SensorInsights selectedEquipmentId={selectedEquipmentId} />
+                </div>
+
+                {/* Energy Usage Summary - Full Width */}
+                <div className="w-full">
+                  <EnergyUsageSummary />
+                </div>
+
+                {/* Equipment Status and Cycle Tracking - Responsive Grid */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  <div className="w-full">
+                    <EquipmentStatus />
+                  </div>
+                  <div className="w-full">
+                    <EquipmentCycleTracking />
+                  </div>
+                </div>
+              </div>
+            )}
             {activeTab === "data-logs" && <DataLogs />}
             {activeTab === "generate-report" && (
               <div className="space-y-6">
@@ -337,6 +427,14 @@ export default function Dashboard() {
                     </div>
                   </CardContent>
                 </Card>
+              </div>
+            )}
+            {activeTab === "users" && (
+              <div className="space-y-4">
+                {/* Placeholder for Users section */}
+                <div className="w-full">
+                  <p className="text-lg font-semibold">Users Section</p>
+                </div>
               </div>
             )}
             {showOnboarding && (

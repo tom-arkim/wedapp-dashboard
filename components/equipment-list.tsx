@@ -19,12 +19,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { SensorData } from "@/components/sensor-data"
-import { MaintenanceSchedule } from "@/components/maintenance-schedule"
 import { EditEquipmentForm } from "@/components/edit-equipment-form"
 import { EquipmentHistory } from "@/components/equipment-history"
 import { generateEquipmentReport } from "@/lib/generate-report"
 import type { Equipment } from "@/lib/equipment"
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip"
+import type { MaintenanceEvent } from "./unified-maintenance-scheduler"
+import { MaintenanceSchedule } from "./maintenance-schedule"
 
 const getEquipmentCategory = (name: string) => {
   if (name.toLowerCase().includes("freezer")) return "Freezer"
@@ -240,6 +241,7 @@ export function EquipmentList({ onEquipmentSelect }: { onEquipmentSelect?: (equi
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [isMaintenanceDialogOpen, setIsMaintenanceDialogOpen] = useState(false)
   const [isHistoryDialogOpen, setIsHistoryDialogOpen] = useState(false)
+  const [maintenanceEvents, setMaintenanceEvents] = useState<MaintenanceEvent[]>([])
 
   const filteredEquipment = equipmentData.filter((equipment) => {
     const matchesSearch =
@@ -536,9 +538,9 @@ export function EquipmentList({ onEquipmentSelect }: { onEquipmentSelect?: (equi
         </Dialog>
 
         <Dialog open={isMaintenanceDialogOpen} onOpenChange={setIsMaintenanceDialogOpen}>
-          <DialogContent>
+          <DialogContent className="max-w-4xl">
             <DialogHeader>
-              <DialogTitle>Schedule Maintenance</DialogTitle>
+              <DialogTitle>Schedule Maintenance - {selectedEquipment?.name}</DialogTitle>
             </DialogHeader>
             <MaintenanceSchedule equipment={selectedEquipment} onSave={() => setIsMaintenanceDialogOpen(false)} />
           </DialogContent>
