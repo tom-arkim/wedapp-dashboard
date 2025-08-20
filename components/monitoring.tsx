@@ -153,7 +153,6 @@ export function Monitoring() {
                   <div className="flex items-center gap-4">
                     {selectedMetric === "temperature" && (
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium">Unit:</span>
                         <div className="flex">
                           <Button
                             variant={tempUnit === "C" ? "default" : "ghost"}
