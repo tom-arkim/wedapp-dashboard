@@ -129,30 +129,6 @@ export function Monitoring() {
                     </SelectContent>
                   </Select>
                 </div>
-
-                {selectedMetric === "temperature" && (
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Temperature Unit</label>
-                    <div className="flex rounded-md border">
-                      <Button
-                        variant={tempUnit === "C" ? "default" : "ghost"}
-                        size="sm"
-                        onClick={() => setTempUnit("C")}
-                        className="rounded-r-none"
-                      >
-                        °C
-                      </Button>
-                      <Button
-                        variant={tempUnit === "F" ? "default" : "ghost"}
-                        size="sm"
-                        onClick={() => setTempUnit("F")}
-                        className="rounded-l-none"
-                      >
-                        °F
-                      </Button>
-                    </div>
-                  </div>
-                )}
               </div>
 
               <div className="flex gap-2">
@@ -174,13 +150,38 @@ export function Monitoring() {
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
                   <span>{config.label} Monitoring</span>
-                  <span className="text-sm text-muted-foreground">
-                    {new Date().toLocaleDateString("en-US", {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    })}
-                  </span>
+                  <div className="flex items-center gap-4">
+                    {selectedMetric === "temperature" && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium">Unit:</span>
+                        <div className="flex">
+                          <Button
+                            variant={tempUnit === "C" ? "default" : "ghost"}
+                            size="sm"
+                            onClick={() => setTempUnit("C")}
+                            className="rounded-r-none border-r-0"
+                          >
+                            °C
+                          </Button>
+                          <Button
+                            variant={tempUnit === "F" ? "default" : "ghost"}
+                            size="sm"
+                            onClick={() => setTempUnit("F")}
+                            className="rounded-l-none"
+                          >
+                            °F
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                    <span className="text-sm text-muted-foreground">
+                      {new Date().toLocaleDateString("en-US", {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      })}
+                    </span>
+                  </div>
                 </CardTitle>
               </CardHeader>
               <CardContent>
