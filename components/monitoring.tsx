@@ -8,6 +8,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
 import { equipmentData } from "./equipment-list"
 
+const celsiusToFahrenheit = (celsius: number) => (celsius * 9) / 5 + 32
+const fahrenheitToCelsius = (fahrenheit: number) => ((fahrenheit - 32) * 5) / 9
+
 const generateSampleData = (metric: string, timeFrame: string) => {
   const dataPoints = timeFrame === "hour" ? 60 : timeFrame === "day" ? 24 : timeFrame === "month" ? 30 : 12
   const baseValue = metric === "temperature" ? 25 : metric === "humidity" ? 45 : 75
@@ -38,11 +41,11 @@ const generateSampleData = (metric: string, timeFrame: string) => {
   })
 }
 
-const metricConfig = {
+const getMetricConfig = (tempUnit: "C" | "F") => ({
   temperature: {
     label: "Temperature",
-    unit: "°C",
-    colors: ["#3b82f6", "#ef4444", "#eab308", "#06b6d4", "#8b5cf6"], // Added more colors for 5 equipment
+    unit: tempUnit === "C" ? "°C" : "°F",
+    colors: ["#3b82f6", "#ef4444", "#eab308", "#06b6d4", "#8b5cf6"],
   },
   humidity: {
     label: "Humidity",
@@ -54,15 +57,31 @@ const metricConfig = {
     unit: "kW",
     colors: ["#3b82f6", "#ef4444", "#eab308", "#06b6d4", "#8b5cf6"],
   },
-}
+})
 
 export function Monitoring() {
-  const [selectedMetric, setSelectedMetric] = useState<keyof typeof metricConfig>("temperature")
+  const [selectedMetric, setSelectedMetric] = useState<"temperature" | "humidity" | "power">("temperature")
   const [selectedAsset, setSelectedAsset] = useState("all")
   const [selectedTimeFrame, setSelectedTimeFrame] = useState("day")
+  const [tempUnit, setTempUnit] = useState<"C" | "F">("C")
 
-  const data = generateSampleData(selectedMetric, selectedTimeFrame)
-  const config = metricConfig[selectedMetric]
+  const rawData = generateSampleData(selectedMetric, selectedTimeFrame)
+
+  const data =
+    selectedMetric === "temperature" && tempUnit === "F"
+      ? rawData.map((point) => {
+          const convertedPoint = { ...point }
+          equipmentData.forEach((equipment) => {
+            const key = `equipment_${equipment.id}`
+            if (convertedPoint[key] !== undefined) {
+              convertedPoint[key] = celsiusToFahrenheit(convertedPoint[key])
+            }
+          })
+          return convertedPoint
+        })
+      : rawData
+
+  const config = getMetricConfig(tempUnit)[selectedMetric]
 
   const timeFrameOptions = [
     { value: "hour", label: "Hour" },
@@ -80,7 +99,10 @@ export function Monitoring() {
         </div>
 
         {/* Metric Tabs */}
-        <Tabs value={selectedMetric} onValueChange={(value) => setSelectedMetric(value as keyof typeof metricConfig)}>
+        <Tabs
+          value={selectedMetric}
+          onValueChange={(value) => setSelectedMetric(value as "temperature" | "humidity" | "power")}
+        >
           <TabsList className="grid w-full grid-cols-3 max-w-md">
             <TabsTrigger value="temperature">Temperature</TabsTrigger>
             <TabsTrigger value="humidity">Humidity</TabsTrigger>
@@ -107,6 +129,30 @@ export function Monitoring() {
                     </SelectContent>
                   </Select>
                 </div>
+
+                {selectedMetric === "temperature" && (
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Temperature Unit</label>
+                    <div className="flex rounded-md border">
+                      <Button
+                        variant={tempUnit === "C" ? "default" : "ghost"}
+                        size="sm"
+                        onClick={() => setTempUnit("C")}
+                        className="rounded-r-none"
+                      >
+                        °C
+                      </Button>
+                      <Button
+                        variant={tempUnit === "F" ? "default" : "ghost"}
+                        size="sm"
+                        onClick={() => setTempUnit("F")}
+                        className="rounded-l-none"
+                      >
+                        °F
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="flex gap-2">
