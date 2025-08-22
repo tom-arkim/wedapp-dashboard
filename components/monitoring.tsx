@@ -143,7 +143,6 @@ export function Monitoring() {
 
               <div className="flex items-center gap-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Label Filter</label>
                   <Select value={selectedLabel} onValueChange={setSelectedLabel}>
                     <SelectTrigger className="w-[160px]">
                       <SelectValue placeholder="Select label" />
