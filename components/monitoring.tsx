@@ -8,6 +8,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
 import { equipmentData } from "./equipment-list"
 
+const predefinedLabels = [
+  { name: "Front of House", color: "#3b82f6" },
+  { name: "Back of House", color: "#10b981" },
+  { name: "Kitchen", color: "#f59e0b" },
+]
+
 const celsiusToFahrenheit = (celsius: number) => (celsius * 9) / 5 + 32
 const fahrenheitToCelsius = (fahrenheit: number) => ((fahrenheit - 32) * 5) / 9
 
@@ -64,6 +70,7 @@ export function Monitoring() {
   const [selectedAsset, setSelectedAsset] = useState("all")
   const [selectedTimeFrame, setSelectedTimeFrame] = useState("day")
   const [tempUnit, setTempUnit] = useState<"C" | "F">("C")
+  const [selectedLabel, setSelectedLabel] = useState("all")
 
   const rawData = generateSampleData(selectedMetric, selectedTimeFrame)
 
@@ -89,6 +96,9 @@ export function Monitoring() {
     { value: "month", label: "Month" },
     { value: "year", label: "Year" },
   ]
+
+  const filteredEquipmentData =
+    selectedLabel === "all" ? equipmentData : equipmentData.filter((equipment) => equipment.label === selectedLabel)
 
   return (
     <div className="min-h-screen bg-background p-6">
@@ -121,7 +131,7 @@ export function Monitoring() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Equipment</SelectItem>
-                      {equipmentData.map((equipment) => (
+                      {filteredEquipmentData.map((equipment) => (
                         <SelectItem key={equipment.id} value={`equipment_${equipment.id}`}>
                           {equipment.name}
                         </SelectItem>
@@ -131,17 +141,39 @@ export function Monitoring() {
                 </div>
               </div>
 
-              <div className="flex gap-2">
-                {timeFrameOptions.map((option) => (
-                  <Button
-                    key={option.value}
-                    variant={selectedTimeFrame === option.value ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setSelectedTimeFrame(option.value)}
-                  >
-                    {option.label}
-                  </Button>
-                ))}
+              <div className="flex items-center gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Label Filter</label>
+                  <Select value={selectedLabel} onValueChange={setSelectedLabel}>
+                    <SelectTrigger className="w-[160px]">
+                      <SelectValue placeholder="Select label" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Labels</SelectItem>
+                      {predefinedLabels.map((label) => (
+                        <SelectItem key={label.name} value={label.name}>
+                          <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: label.color }} />
+                            {label.name}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="flex gap-2">
+                  {timeFrameOptions.map((option) => (
+                    <Button
+                      key={option.value}
+                      variant={selectedTimeFrame === option.value ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setSelectedTimeFrame(option.value)}
+                    >
+                      {option.label}
+                    </Button>
+                  ))}
+                </div>
               </div>
             </div>
 
@@ -232,7 +264,7 @@ export function Monitoring() {
                           return null
                         }}
                       />
-                      {equipmentData.map((equipment, index) => {
+                      {filteredEquipmentData.map((equipment, index) => {
                         const equipmentKey = `equipment_${equipment.id}`
                         const shouldShow = selectedAsset === "all" || selectedAsset === equipmentKey
 
@@ -257,7 +289,7 @@ export function Monitoring() {
                 {/* Legend placed below the chart */}
                 <div className="mt-6 pt-4 border-t">
                   <div className="flex flex-wrap gap-6 justify-center">
-                    {equipmentData.map((equipment, index) => {
+                    {filteredEquipmentData.map((equipment, index) => {
                       const equipmentKey = `equipment_${equipment.id}`
                       const shouldShow = selectedAsset === "all" || selectedAsset === equipmentKey
 
