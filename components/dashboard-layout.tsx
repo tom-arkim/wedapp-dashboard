@@ -39,6 +39,7 @@ export function DashboardLayout({ children, onAddEquipment }: DashboardLayoutPro
   const pathname = usePathname()
   const [showOnboarding, setShowOnboarding] = useState(false)
   const [showUserProfile, setShowUserProfile] = useState(false)
+  const [dropdownOpen, setDropdownOpen] = useState(false)
 
   const handleNavigation = (itemId: string) => {
     switch (itemId) {
@@ -73,6 +74,36 @@ export function DashboardLayout({ children, onAddEquipment }: DashboardLayoutPro
       onAddEquipment()
     } else {
       setShowOnboarding(true)
+    }
+  }
+
+  const handleSettingsClick = () => {
+    try {
+      console.log("[v0] Settings clicked")
+      router.push("/settings")
+      setDropdownOpen(false)
+    } catch (error) {
+      console.error("[v0] Settings navigation error:", error)
+    }
+  }
+
+  const handleAppsClick = () => {
+    try {
+      console.log("[v0] Apps clicked")
+      router.push("#")
+      setDropdownOpen(false)
+    } catch (error) {
+      console.error("[v0] Apps navigation error:", error)
+    }
+  }
+
+  const handleLogoutClick = () => {
+    try {
+      console.log("[v0] Logout clicked")
+      // Add actual logout logic here when ready
+      setDropdownOpen(false)
+    } catch (error) {
+      console.error("[v0] Logout error:", error)
     }
   }
 
@@ -189,9 +220,16 @@ export function DashboardLayout({ children, onAddEquipment }: DashboardLayoutPro
                   </Button>
                   <NotificationsDropdown />
                   <ThemeToggle />
-                  <DropdownMenu>
+                  <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {
+                          console.log("[v0] Dropdown trigger clicked")
+                          setDropdownOpen(!dropdownOpen)
+                        }}
+                      >
                         <Settings className="h-5 w-5" />
                       </Button>
                     </DropdownMenuTrigger>
@@ -203,16 +241,16 @@ export function DashboardLayout({ children, onAddEquipment }: DashboardLayoutPro
                         </div>
                       </DropdownMenuLabel>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => router.push("/settings")}>
+                      <DropdownMenuItem onClick={handleSettingsClick}>
                         <Settings className="mr-2 h-4 w-4" />
                         <span>Settings</span>
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => router.push("#")}>
+                      <DropdownMenuItem onClick={handleAppsClick}>
                         <Grid3X3 className="mr-2 h-4 w-4" />
                         <span>Apps</span>
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => console.log("Logging out...")}>
+                      <DropdownMenuItem onClick={handleLogoutClick}>
                         <LogOut className="mr-2 h-4 w-4" />
                         <span>Log out</span>
                       </DropdownMenuItem>
