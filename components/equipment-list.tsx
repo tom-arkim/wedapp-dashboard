@@ -27,6 +27,12 @@ import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/comp
 import type { MaintenanceEvent } from "./unified-maintenance-scheduler"
 import { MaintenanceSchedule } from "./maintenance-schedule"
 
+const predefinedLabels = [
+  { name: "Front of House", color: "bg-blue-500" },
+  { name: "Back of House", color: "bg-green-500" },
+  { name: "Kitchen", color: "bg-orange-500" },
+]
+
 const getEquipmentCategory = (name: string) => {
   if (name.toLowerCase().includes("freezer")) return "Freezer"
   if (name.toLowerCase().includes("ice cream")) return "Ice Cream Equipment"
@@ -35,12 +41,17 @@ const getEquipmentCategory = (name: string) => {
   return "Other"
 }
 
-const getUniqueLocations = () => {
-  return [...new Set(equipmentData.map((equipment) => equipment.location))]
+const getUniqueLabels = () => {
+  return [...new Set(equipmentData.map((equipment) => equipment.label))]
 }
 
 const getUniqueCategories = () => {
   return [...new Set(equipmentData.map((equipment) => getEquipmentCategory(equipment.name)))]
+}
+
+const getLabelColor = (labelName: string) => {
+  const label = predefinedLabels.find((l) => l.name === labelName)
+  return label ? label.color : "bg-gray-500"
 }
 
 export const equipmentData: Equipment[] = [
@@ -49,7 +60,8 @@ export const equipmentData: Equipment[] = [
     name: "Display Freezer 1",
     model: "IF-2000",
     serialNumber: "DF1-001-2022",
-    location: "Front Store",
+    location: "Front Store", // Keeping location for backward compatibility
+    label: "Front of House", // Added label field
     manufacturer: "IceCool Tech",
     installDate: new Date("2022-03-15"),
     status: "operational",
@@ -62,7 +74,7 @@ export const equipmentData: Equipment[] = [
       status: "active",
     },
     sensors: [
-      { id: "s1", type: "temperature", status: "active", currentReading: -0.7, unit: "°F" }, // Converted from -18.5°C
+      { id: "s1", type: "temperature", status: "active", currentReading: -0.7, unit: "°F" },
       { id: "s2", type: "humidity", status: "active", currentReading: 45.2, unit: "%" },
       { id: "s3", type: "current", status: "active", currentReading: 5.2, unit: "A" },
     ],
@@ -87,6 +99,7 @@ export const equipmentData: Equipment[] = [
     model: "ICM-5000",
     serialNumber: "ICM1-002-2022",
     location: "Kitchen",
+    label: "Kitchen", // Added label field
     manufacturer: "FrozenDelight Systems",
     installDate: new Date("2022-04-20"),
     status: "warning",
@@ -99,7 +112,7 @@ export const equipmentData: Equipment[] = [
       status: "active",
     },
     sensors: [
-      { id: "s4", type: "temperature", status: "warning", currentReading: 22.6, unit: "°F" }, // Converted from -5.2°C
+      { id: "s4", type: "temperature", status: "warning", currentReading: 22.6, unit: "°F" },
       { id: "s5", type: "current", status: "active", currentReading: 8.7, unit: "A" },
       { id: "s6", type: "vibration", status: "active", currentReading: 0.15, unit: "mm/s" },
     ],
@@ -124,6 +137,7 @@ export const equipmentData: Equipment[] = [
     model: "SSM-3000",
     serialNumber: "SSM3-003-2022",
     location: "Counter",
+    label: "Front of House", // Added label field
     manufacturer: "SoftServe Solutions",
     installDate: new Date("2022-05-10"),
     status: "operational",
@@ -136,7 +150,7 @@ export const equipmentData: Equipment[] = [
       status: "active",
     },
     sensors: [
-      { id: "s7", type: "temperature", status: "active", currentReading: 24.8, unit: "°F" }, // Converted from -4.0°C
+      { id: "s7", type: "temperature", status: "active", currentReading: 24.8, unit: "°F" },
       { id: "s8", type: "current", status: "active", currentReading: 6.5, unit: "A" },
       { id: "s9", type: "vibration", status: "active", currentReading: 0.08, unit: "mm/s" },
     ],
@@ -161,6 +175,7 @@ export const equipmentData: Equipment[] = [
     model: "WF-5000",
     serialNumber: "WF5-004-2022",
     location: "Back Store",
+    label: "Back of House", // Added label field
     manufacturer: "ColdStorage Inc.",
     installDate: new Date("2022-02-01"),
     status: "operational",
@@ -173,7 +188,7 @@ export const equipmentData: Equipment[] = [
       status: "active",
     },
     sensors: [
-      { id: "s10", type: "temperature", status: "active", currentReading: -10.3, unit: "°F" }, // Converted from -23.5°C
+      { id: "s10", type: "temperature", status: "active", currentReading: -10.3, unit: "°F" },
       { id: "s11", type: "humidity", status: "active", currentReading: 35, unit: "%" },
       { id: "s12", type: "current", status: "active", currentReading: 12.3, unit: "A" },
     ],
@@ -198,6 +213,7 @@ export const equipmentData: Equipment[] = [
     model: "MSB-1000",
     serialNumber: "MSB1-005-2022",
     location: "Counter",
+    label: "Front of House", // Added label field
     manufacturer: "ShakeItUp Technologies",
     installDate: new Date("2022-06-15"),
     status: "maintenance",
@@ -211,7 +227,7 @@ export const equipmentData: Equipment[] = [
     },
     sensors: [
       { id: "s13", type: "current", status: "warning", currentReading: 3.8, unit: "A" },
-      { id: "s14", type: "temperature", status: "active", currentReading: 35.6, unit: "°F" }, // Converted from 2°C
+      { id: "s14", type: "temperature", status: "active", currentReading: 35.6, unit: "°F" },
       { id: "s15", type: "vibration", status: "active", currentReading: 0.5, unit: "mm/s" },
     ],
     uptime: 88.7,
@@ -236,6 +252,7 @@ export function EquipmentList({ onEquipmentSelect }: { onEquipmentSelect?: (equi
   const [statusFilter, setStatusFilter] = useState<string>("all")
   const [locationFilter, setLocationFilter] = useState<string>("all")
   const [categoryFilter, setCategoryFilter] = useState<string>("all")
+  const [labelFilter, setLabelFilter] = useState<string>("all")
   const [selectedEquipment, setSelectedEquipment] = useState<Equipment | null>(null)
   const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
@@ -247,11 +264,13 @@ export function EquipmentList({ onEquipmentSelect }: { onEquipmentSelect?: (equi
     const matchesSearch =
       equipment.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       equipment.model.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      equipment.location.toLowerCase().includes(searchTerm.toLowerCase())
+      equipment.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      equipment.label?.toLowerCase().includes(searchTerm.toLowerCase()) // Added label to search
     const matchesStatus = statusFilter === "all" || equipment.status === statusFilter
     const matchesLocation = locationFilter === "all" || equipment.location === locationFilter
     const matchesCategory = categoryFilter === "all" || getEquipmentCategory(equipment.name) === categoryFilter
-    return matchesSearch && matchesStatus && matchesLocation && matchesCategory
+    const matchesLabel = labelFilter === "all" || equipment.label === labelFilter // Added label filter
+    return matchesSearch && matchesStatus && matchesLocation && matchesCategory && matchesLabel
   })
 
   const getStatusColor = (status: string) => {
@@ -345,15 +364,18 @@ export function EquipmentList({ onEquipmentSelect }: { onEquipmentSelect?: (equi
                     <SelectItem value="maintenance">Maintenance</SelectItem>
                   </SelectContent>
                 </Select>
-                <Select value={locationFilter} onValueChange={setLocationFilter}>
+                <Select value={labelFilter} onValueChange={setLabelFilter}>
                   <SelectTrigger className="w-full md:w-[140px]">
-                    <SelectValue placeholder="Location" />
+                    <SelectValue placeholder="Labels" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Locations</SelectItem>
-                    {getUniqueLocations().map((location) => (
-                      <SelectItem key={location} value={location}>
-                        {location}
+                    <SelectItem value="all">All Labels</SelectItem>
+                    {getUniqueLabels().map((label) => (
+                      <SelectItem key={label} value={label}>
+                        <div className="flex items-center space-x-2">
+                          <div className={`w-3 h-3 rounded-full ${getLabelColor(label)}`} />
+                          <span>{label}</span>
+                        </div>
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -383,7 +405,7 @@ export function EquipmentList({ onEquipmentSelect }: { onEquipmentSelect?: (equi
                 <TableRow>
                   <TableHead>Name</TableHead>
                   <TableHead>Model</TableHead>
-                  <TableHead>Location</TableHead>
+                  <TableHead>Labels</TableHead> {/* Changed from Location to Labels */}
                   <TableHead>Status</TableHead>
                   <TableHead>Last Maintenance</TableHead>
                   <TableHead>Next Maintenance</TableHead>
@@ -397,7 +419,12 @@ export function EquipmentList({ onEquipmentSelect }: { onEquipmentSelect?: (equi
                   <TableRow key={equipment.id}>
                     <TableCell className="font-medium">{equipment.name}</TableCell>
                     <TableCell>{equipment.model}</TableCell>
-                    <TableCell>{equipment.location}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center space-x-2">
+                        <div className={`w-3 h-3 rounded-full ${getLabelColor(equipment.label || "")}`} />
+                        <span>{equipment.label}</span>
+                      </div>
+                    </TableCell>
                     <TableCell>
                       <Badge className={getStatusColor(equipment.status)}>
                         {equipment.status.charAt(0).toUpperCase() + equipment.status.slice(1)}
@@ -586,7 +613,11 @@ function EquipmentOverview({ equipment }: { equipment: Equipment | null }) {
                 {equipment.warranty ? formatDate(equipment.warranty.endDate) : "N/A"}
               </p>
               <p>
-                <span className="font-medium">Location:</span> {equipment.location}
+                <span className="font-medium">Label:</span>
+                <div className="inline-flex items-center space-x-2 ml-2">
+                  <div className={`w-3 h-3 rounded-full ${getLabelColor(equipment.label || "")}`} />
+                  <span>{equipment.label}</span>
+                </div>
               </p>
             </div>
           </CardContent>
