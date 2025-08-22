@@ -232,6 +232,55 @@ export function GeneralSettings() {
         </CardContent>
       </Card>
 
+      <Card>
+        <CardHeader>
+          <CardTitle>Advanced Configuration</CardTitle>
+          <CardDescription>Additional system settings and advanced options.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="log-level">System Log Level</Label>
+            <Select defaultValue="info">
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="debug">Debug</SelectItem>
+                <SelectItem value="info">Info</SelectItem>
+                <SelectItem value="warn">Warning</SelectItem>
+                <SelectItem value="error">Error</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <Separator />
+
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label>Enable debug mode</Label>
+              <p className="text-sm text-muted-foreground">Show additional debugging information</p>
+            </div>
+            <Switch />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="cache-duration">Cache Duration</Label>
+            <Select defaultValue="1hour">
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="15min">15 Minutes</SelectItem>
+                <SelectItem value="30min">30 Minutes</SelectItem>
+                <SelectItem value="1hour">1 Hour</SelectItem>
+                <SelectItem value="4hours">4 Hours</SelectItem>
+                <SelectItem value="24hours">24 Hours</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+      </Card>
+
       <div className="flex justify-end gap-2">
         <Button variant="outline">Reset to Defaults</Button>
         <Button>Save Changes</Button>
