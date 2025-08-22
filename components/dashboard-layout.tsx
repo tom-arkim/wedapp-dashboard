@@ -3,7 +3,7 @@
 import type React from "react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { BarChart3, Settings, User, Wrench, Database, Plus, Bell, LogOut, Activity, Users } from "lucide-react"
+import { BarChart3, Settings, Wrench, Database, Plus, Bell, LogOut, Activity, Users } from "lucide-react"
 import { NotificationsDropdown } from "./notifications-dropdown"
 import { ThemeToggle } from "./theme-toggle"
 import {
@@ -192,7 +192,7 @@ export function DashboardLayout({ children, onAddEquipment }: DashboardLayoutPro
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" size="icon">
-                        <User className="h-5 w-5" />
+                        <Settings className="h-5 w-5" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className="w-56" align="end">
@@ -204,7 +204,7 @@ export function DashboardLayout({ children, onAddEquipment }: DashboardLayoutPro
                       </DropdownMenuLabel>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem onClick={() => setShowUserProfile(true)}>
-                        <User className="mr-2 h-4 w-4" />
+                        <Settings className="mr-2 h-4 w-4" />
                         <span>View Profile</span>
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => router.push("/settings?tab=account")}>
