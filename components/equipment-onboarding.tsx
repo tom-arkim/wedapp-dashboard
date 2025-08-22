@@ -38,11 +38,9 @@ interface EquipmentLabel {
 }
 
 const predefinedLabels: EquipmentLabel[] = [
-  { id: "critical", name: "Critical", color: "#ef4444" },
-  { id: "maintenance", name: "Maintenance", color: "#f97316" },
-  { id: "operational", name: "Operational", color: "#22c55e" },
-  { id: "testing", name: "Testing", color: "#3b82f6" },
-  { id: "offline", name: "Offline", color: "#6b7280" },
+  { id: "front-of-house", name: "Front of House", color: "#3b82f6" },
+  { id: "back-of-house", name: "Back of House", color: "#22c55e" },
+  { id: "kitchen", name: "Kitchen", color: "#f97316" },
 ]
 
 export function EquipmentOnboarding({ onClose, onEquipmentAdded }: EquipmentOnboardingProps) {
