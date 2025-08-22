@@ -113,8 +113,10 @@ export function SettingsLayout({ children }: SettingsLayoutProps) {
               </header>
 
               <main className="flex-1 overflow-hidden">
-                <div className="h-full overflow-y-auto">
-                  <div className="max-w-4xl mx-auto p-6 space-y-6">{children}</div>
+                <div className="h-full overflow-y-auto scroll-smooth">
+                  <div className="min-h-full">
+                    <div className="max-w-4xl mx-auto p-6 space-y-6 pb-12">{children}</div>
+                  </div>
                 </div>
               </main>
             </div>
