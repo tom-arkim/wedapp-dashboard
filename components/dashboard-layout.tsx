@@ -3,7 +3,7 @@
 import type React from "react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { BarChart3, Settings, Wrench, Database, Plus, Bell, LogOut, Activity, Users } from "lucide-react"
+import { BarChart3, Settings, Wrench, Database, Plus, LogOut, Activity, Users, Grid3X3 } from "lucide-react"
 import { NotificationsDropdown } from "./notifications-dropdown"
 import { ThemeToggle } from "./theme-toggle"
 import {
@@ -203,21 +203,13 @@ export function DashboardLayout({ children, onAddEquipment }: DashboardLayoutPro
                         </div>
                       </DropdownMenuLabel>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => setShowUserProfile(true)}>
+                      <DropdownMenuItem onClick={() => router.push("/settings")}>
                         <Settings className="mr-2 h-4 w-4" />
-                        <span>View Profile</span>
+                        <span>Settings</span>
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => router.push("/settings?tab=account")}>
-                        <Settings className="mr-2 h-4 w-4" />
-                        <span>Profile Settings</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => router.push("/settings?tab=display")}>
-                        <Settings className="mr-2 h-4 w-4" />
-                        <span>Display Settings</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => router.push("/settings?tab=notifications")}>
-                        <Bell className="mr-2 h-4 w-4" />
-                        <span>Notifications</span>
+                      <DropdownMenuItem onClick={() => router.push("#")}>
+                        <Grid3X3 className="mr-2 h-4 w-4" />
+                        <span>Apps</span>
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem onClick={() => console.log("Logging out...")}>
