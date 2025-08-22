@@ -1,5 +1,5 @@
-import UserSettings from "@/components/user-settings"
+import { GeneralSettings } from "@/components/settings/general-settings"
 
 export default function SettingsPage() {
-  return <UserSettings />
+  return <GeneralSettings />
 }
